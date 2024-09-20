@@ -1,0 +1,76 @@
+#pragma comment(lib,"Ws2_32.lib")
+#include <stdio.h>
+#include <string.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+int main() {
+
+	WSADATA wsaData;
+	int WSAKickstart;
+	struct sockaddr_in sin;
+	sin.sin_family = AF_INET;
+
+
+	WSAKickstart = WSAStartup(MAKEWORD(2, 2), &wsaData); //WSA use version Winsock2. Startup required to be able to use the Windows Sockets services.
+	if (WSAKickstart != 0) {
+		printf("[!] WSAStartup failed with error: %d\n", WSAKickstart);
+		return 1;
+	}
+	else {
+		printf("[S] WSA Successfully started.\n");
+	}
+
+	//Socket creation below
+	SOCKET cSock = INVALID_SOCKET;
+	cSock = socket(AF_INET, SOCK_STREAM, NULL); //AF_INET -> IPv4, SOCK_STREAM -> TCP, NULL -> NULL
+
+	if (cSock < 0) {
+		printf("[!] Socket creation failed with error: %d\n", WSAGetLastError());
+		WSACleanup();
+		return 2;
+	}
+	else {
+		printf("[S] Socket(cSock) successfully Created\n");
+	}
+
+	char ipv4[28];
+	printf("Enter hostname: ");
+	scanf("%s", &ipv4);
+	sin.sin_addr.s_addr = inet_addr(ipv4); //INET_ADDR converts str to int
+	printf("%s\n", ipv4);
+
+	unsigned int port_start;
+	unsigned int port_end;
+	printf("Enter first port: ");
+	scanf("%u", &port_start);
+	printf("Enter last port: ");
+	scanf("%u", &port_end);
+	
+	printf("First port: %u\n", port_start);
+	printf("Last port: %u\n", port_end);
+
+
+	int Chk;
+	
+	for (int i = port_start; i <= port_end; i++) {
+
+
+		sin.sin_port = htons(i); //port added to htons
+
+		Chk = connect(cSock, (struct sockaddr*)&sin, sizeof(sin));
+		if (Chk < 0) {
+			printf("Port [%d] is closed\n.", i);
+		}
+		else {
+			printf("Port [%d] is open\n", i);
+		}
+		cSock = socket(AF_INET, SOCK_STREAM, NULL); //Socket closes after finishing the above. This recreates the socket.
+	}
+
+
+
+	WSACleanup(); //Terminates the use of the Winsock 2 DLL.
+	return 0;
+
+}
