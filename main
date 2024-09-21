@@ -37,7 +37,7 @@ int main() {
 	char ipv4[28];
 	printf("Enter hostname: ");
 	scanf("%s", &ipv4);
-	sin.sin_addr.s_addr = inet_addr(ipv4); //INET_ADDR converts str to int
+	sin.sin_addr.s_addr = inet_addr(ipv4); //INET_ADDR converts str to int in the sockaddr_in struct
 	printf("%s\n", ipv4);
 
 	unsigned int port_start;
@@ -52,7 +52,7 @@ int main() {
 
 
 	int Chk;
-	
+
 	for (int i = port_start; i <= port_end; i++) {
 
 
@@ -69,7 +69,7 @@ int main() {
 	}
 
 
-
+	closesocket(cSock);
 	WSACleanup(); //Terminates the use of the Winsock 2 DLL.
 	return 0;
 
