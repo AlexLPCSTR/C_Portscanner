@@ -4,6 +4,8 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#define BUFLEN 512
+
 int main() {
 
 	WSADATA wsaData;
@@ -51,26 +53,43 @@ int main() {
 	printf("Last port: %u\n", port_end);
 
 
-	int Chk;
+	int ConnectSocket;
+	int cRecv;
+	char CharRecv[BUFLEN] = "\0"; //Null-terminated operator is necessary so that garbage characters don't print
+	int CharRecvBuf = BUFLEN;
+	
 
 	for (int i = port_start; i <= port_end; i++) {
 
 
 		sin.sin_port = htons(i); //port added to htons
+		ConnectSocket = connect(cSock, (struct sockaddr*)&sin, sizeof(sin));
 
-		Chk = connect(cSock, (struct sockaddr*)&sin, sizeof(sin));
-		if (Chk < 0) {
-			printf("Port [%d] is closed\n.", i);
+		cRecv = recv(cSock, CharRecv, CharRecvBuf, 0);
+		if (cRecv == 0) {
+			printf("[?] No message to be received from port: [%d]\n", i); 
+		}
+		else if (cRecv <= -1) {
+			printf("[!] Recv failed with error: %d\n", cRecv);
+			WSACleanup();
+			closesocket(cSock);
+			return 3;
+		}
+
+
+		if (ConnectSocket < 0) {
+			printf("Port [%d] is closed, recv: [%s]\n.", i, CharRecv);
 		}
 		else {
-			printf("Port [%d] is open\n", i);
+			printf("Port [%d] is open, recv: [%s]\n", i, CharRecv);
 		}
-		cSock = socket(AF_INET, SOCK_STREAM, NULL); //Socket closes after finishing the above. This recreates the socket.
+		cSock = socket(AF_INET, SOCK_STREAM, NULL); //Socket re-initialization
 	}
 
 
 	closesocket(cSock);
 	WSACleanup(); //Terminates the use of the Winsock 2 DLL.
+	printf("Socket closed and DLL services closed.");
 	return 0;
 
 }
