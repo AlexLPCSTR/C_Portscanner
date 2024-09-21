@@ -4,7 +4,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#define BUFLEN 512
+#define BUFLEN 1024
 
 int main() {
 
@@ -48,7 +48,7 @@ int main() {
 	scanf("%u", &port_start);
 	printf("Enter last port: ");
 	scanf("%u", &port_end);
-	
+
 	printf("First port: %u\n", port_start);
 	printf("Last port: %u\n", port_end);
 
@@ -57,7 +57,7 @@ int main() {
 	int cRecv;
 	char CharRecv[BUFLEN] = "\0"; //Null-terminated operator is necessary so that garbage characters don't print
 	int CharRecvBuf = BUFLEN;
-	
+
 
 	for (int i = port_start; i <= port_end; i++) {
 
@@ -67,7 +67,7 @@ int main() {
 
 		cRecv = recv(cSock, CharRecv, CharRecvBuf, 0);
 		if (cRecv == 0) {
-			printf("[?] No message to be received from port: [%d]\n", i); 
+			printf("[?] No message to be received from port: [%d]\n", i);
 		}
 		else if (cRecv <= -1) {
 			printf("[!] Recv failed with error: %d\n", cRecv);
@@ -87,9 +87,13 @@ int main() {
 	}
 
 
+
+
 	closesocket(cSock);
 	WSACleanup(); //Terminates the use of the Winsock 2 DLL.
-	printf("Socket closed and DLL services closed.");
+	printf("[S]Socket closed and Winsock DLL closed\n");
+	printf("Press any key to EXIT\n");
+	getch();
 	return 0;
 
 }
